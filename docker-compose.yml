@@ -13,6 +13,8 @@ services:
   prometheus:
     image: prom/prometheus:latest
     user: "1000"
+    depends_on:
+      - scraper
     volumes:
       - ./prometheus/:/etc/prometheus/
       - ./prometheus_data:/prometheus
@@ -25,24 +27,6 @@ services:
       - 9090:9090
     networks:
       - back-tier
-    restart: always
-
-  node-exporter:
-    image: prom/node-exporter
-    volumes:
-      - /:/host:ro,rslave
-    network_mode: host
-    pid: host
-    command: 
-      - '--path.procfs=/host/proc' 
-      - '--path.sysfs=/host/sys'
-      - '--path.rootfs=/host'
-      - --collector.filesystem.ignored-mount-points
-      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
-      - --collector.netdev.ignored-devices
-      - "^(lo|docker[0-9]|veth.+|br-.+)$$"
-    ports:
-      - 9100:9100
     restart: always
 
   grafana:
@@ -71,5 +55,5 @@ services:
       - back-tier
     restart: always
     environment:
-      ENVOY_HOST: 192.168.86.54
+      ENVOY_HOST: 192.168.1.89
       ENVOY_PASS: PASSWORD
